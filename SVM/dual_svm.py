@@ -13,9 +13,7 @@ class DualSvmModel:
         self.X = X.copy()
         self.y = y.copy()
         self.C = hyper_c
-        # self.kernel_f = kernel_f
-        self.kernel = kernel.calc_kernel(self.X)
-        print(self.X)
+        self.kernel = kernel.calc_kernel(self.X.values, self.X.values)
         self.create_model()
         del self.X
         del self.y
@@ -27,28 +25,25 @@ class DualSvmModel:
             init_alpha, self.X.values, self.y.values
         )
         self.bias = self.calc_bias()
-
-        print(self.bias)
-        print(self.calc_weight_vector())
+        print('SUPPORT VECTORS:', len(self.sv_X))
 
     def calc_lagrangian_multipliers(self, X: np.ndarray, y: np.ndarray, kernel) -> np.ndarray:
 
         def objective(alphas, X_input, y_input):
-            # equation: 1/2 * sum_i ( sum_j ( y_i y_j a_i a_j {x_i, x_j} ) ) - sum_i (a_i)
-            # kernel_output = kernel.calc_kernel(X_input)
-            # kernel
-            y_dot_y = np.outer(y_input, y_input) # Gives a matrix of dot products between all y_i's
-            a_dot_a = np.outer(alphas, alphas) # Gives a matrix of dot products between all alpha_i's
-            to_sum = np.multiply(kernel, y_dot_y, a_dot_a)
+            # equation: 1/2 * sum_i ( sum_j ( y_i y_j a_i a_j K(x_i, x_j) ) ) - sum_i (a_i)
+            y_dot_y = np.outer(y_input, y_input)  # Gives a matrix of dot products between all y_i's
+            a_dot_a = np.outer(alphas, alphas)  # Gives a matrix of dot products between all alpha_i's
+            to_sum = np.multiply(kernel, np.multiply(y_dot_y, a_dot_a))
             return 0.5 * np.sum(np.sum(to_sum)) - np.sum(alphas)
 
-        def constraint(alphas, X_input, y_input):
-            return len(y) - np.sum(alphas * y_input) # Needs to be sum(alpha_i * y_i) = 0
+        def constraint(alphas, _, y_input):
+            return np.dot(alphas, y_input)
 
         args = (X, y)
         x0 = np.array([0] * len(y))  # Will guess 0 as default for all alphas
         bnds = [(0, self.C)] * len(y)  # Know 0 <= alpha <= C
-        cons = ({'type': 'ineq', 'fun': constraint, 'args': args})
+        cons = ({'type': 'eq', 'fun': constraint, 'args': args})
+        print('MINIMIZING, THIS MAY TAKE A WHILE . . .')
         return minimize(
             fun=objective,
             x0=x0,
@@ -56,6 +51,7 @@ class DualSvmModel:
             bounds=bnds,
             constraints=cons,
             args=args,
+            callback=lambda x: print('ITERATION\nALPHA MIN', min(x), '\nALPHA MAX', max(x), '\nALPHA MEDIAN', np.median(x))
         )
 
     def determine_support_vectors(self, alpha: np.ndarray, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -75,7 +71,5 @@ class DualSvmModel:
         return np.sum(s) / len(s)
 
     def evaluate(self, X: pd.DataFrame, kernel=linear_kernel) -> np.ndarray:
-        k = kernel.calc_kernel(X.to_numpy())
-        print(X.shape)
-        print(k.shape)
-        return np.sign(np.dot(X.to_numpy(), self.calc_weight_vector()) - self.bias)
+        k = kernel.calc_kernel(self.sv_X, X.to_numpy())
+        return np.sign(np.dot(np.multiply(self.alpha, self.sv_y), k) + self.bias)

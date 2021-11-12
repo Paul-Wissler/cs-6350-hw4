@@ -87,8 +87,7 @@ def q3b():
         print(model.calc_weight_vector())
         print(model.bias)
         print('\n')
-
-
+        
 
 def load_bank_note_data(csv: str) -> (pd.DataFrame, pd.Series):
     X_cols = ['WaveletVariance', 'WaveletSkew', 'WaveletCurtosis', 'ImageEntropy']
