@@ -55,6 +55,7 @@ class GaussianKernel:
 #     return X1, X2
 
 
+# NOTE: This is code from Shibo to maybe improve my Kernel's performance, but I don't want to use it until I understand it
 # class Kernel_ARD:
 #     def __init__(self, jitter=0):
 #         self.jitter = tf.constant(jitter, dtype=tf_type)

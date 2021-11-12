@@ -14,8 +14,8 @@ def q2a():
     
     hyper_cs = [
         100/873,
-        # 500/873,
-        # 700/873,
+        500/873,
+        700/873,
     ]
 
     for hyper_c in hyper_cs:
@@ -31,15 +31,6 @@ def q2a():
         plt.plot(model.J)
     plt.show()
 
-    # model = perc.PerceptronModel(X, y, random_seed=False, rate=.1)
-    # error = 1 - model.test(X, y)
-    # print('TRAIN ERROR: ', error)
-    # error = 1 - model.test(X_test, y_test)
-    # print('TEST ERROR: ', error)
-    # print('')
-    # print(model.weights)
-    # print('\n')
-
 
 def q3a():
     print('DUAL SVM')
@@ -48,13 +39,15 @@ def q3a():
     
     hyper_cs = [
         100/873,
-        # 500/873,
-        # 700/873,
+        500/873,
+        700/873,
     ]
 
     for hyper_c in hyper_cs:
         print(f'HYPER PARAMETER C: {hyper_c}')
         model = svm.DualSvmModel(X, y, hyper_c=hyper_c)
+        print('')
+        print('SUPPORT VECTORS:', len(model.sv_X))
         error = 1 - model.test(X, y)
         print('TRAIN ERROR: ', error)
         error = 1 - model.test(X_test, y_test)
@@ -76,17 +69,29 @@ def q3b():
         # 700/873,
     ]
 
+    gammas = [
+        0.1,
+        # 0.5,
+        # 1,
+        # 5,
+        # 100,
+    ]
+
     for hyper_c in hyper_cs:
-        print(f'HYPER PARAMETER C: {hyper_c}')
-        model = svm.DualSvmModel(X, y, hyper_c=hyper_c, kernel=svm.GaussianKernel(0.1))
-        error = 1 - model.test(X, y)
-        print('TRAIN ERROR: ', error)
-        error = 1 - model.test(X_test, y_test)
-        print('TEST ERROR: ', error)
-        print('')
-        print(model.calc_weight_vector())
-        print(model.bias)
-        print('\n')
+        for gamma in gammas:
+            print(f'HYPER PARAMETER C: {hyper_c}')
+            print(f'HYPER PARAMETER GAMMA: {gamma}')
+            model = svm.DualSvmModel(X, y, hyper_c=hyper_c, kernel=svm.GaussianKernel(0.1))
+            print('')
+            print('SUPPORT VECTORS:', len(model.sv_X))
+            error = 1 - model.test(X, y)
+            print('TRAIN ERROR: ', error)
+            error = 1 - model.test(X_test, y_test)
+            print('TEST ERROR: ', error)
+            print('')
+            print(model.calc_weight_vector())
+            print(model.bias)
+            print('\n')
         
 
 def load_bank_note_data(csv: str) -> (pd.DataFrame, pd.Series):

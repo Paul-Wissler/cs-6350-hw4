@@ -25,7 +25,6 @@ class DualSvmModel:
             init_alpha, self.X.values, self.y.values
         )
         self.bias = self.calc_bias()
-        print('SUPPORT VECTORS:', len(self.sv_X))
 
     def calc_lagrangian_multipliers(self, X: np.ndarray, y: np.ndarray, kernel) -> np.ndarray:
 
@@ -51,7 +50,7 @@ class DualSvmModel:
             bounds=bnds,
             constraints=cons,
             args=args,
-            callback=lambda x: print('ITERATION\nALPHA MIN', min(x), '\nALPHA MAX', max(x), '\nALPHA MEDIAN', np.median(x))
+            callback=lambda x: print('NEW MINIMIZE ITERATION\nALPHA MIN', min(x), '\nALPHA MAX', max(x), '\nALPHA MEDIAN', np.median(x))
         )
 
     def determine_support_vectors(self, alpha: np.ndarray, X: np.ndarray, y: np.ndarray) -> np.ndarray:
