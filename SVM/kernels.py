@@ -18,56 +18,22 @@ class GaussianKernel:
 
     def calc_kernel(self, X1: np.ndarray, X2: np.ndarray):
         # k(x_i, x_j) = exp(-||x_i - x_j||^2 / gamma)
-        # X1, X2 = _pad_smaller_matrix_with_0s(X1, X2)
-        x_i_j_diff = self.create_rolled_x_diff_array(X1, X2)
-        # print(np.linalg.norm(x_i_j_diff, axis=1).shape)
-        print('KERNEL SHAPE', np.exp(-np.square(np.linalg.norm(x_i_j_diff, axis=1)) / self.gamma).shape)
-        return np.exp(-np.square(np.linalg.norm(x_i_j_diff, axis=1)) / self.gamma)
+        x_i_j_diff = self.create_diff_permutations_for_Xs(X1, X2)
+        norm_x_i_j_diff = np.linalg.norm(x_i_j_diff, axis=1)
+        sq_norm_x_i_j_diff = np.square(norm_x_i_j_diff)
+        k = np.exp(-1 * sq_norm_x_i_j_diff / self.gamma)
+        return k
 
-    def create_rolled_x_diff_array(self, X1: np.ndarray, X2: np.ndarray):
-        # creates a matrix over which values can be summed to minimize for loops
-        x_i_j_diff = np.empty((0, len(X1[0]), len(X1)), float).T
-        for j in range(len(X1)):
-            x_i_j_diff = np.dstack([x_i_j_diff, X1 - np.roll(X2, j, axis=0)])
-        # print(j)
-        # if len(X1) <= len(X2):
-        #     for j in range(len(X1)):
-        #         # print(np.tile(X1[j], (len(X2), 1)))
-        #         print((np.tile(X1[j], (len(X2), 1)) - X2).shape)
-        #         print((X1 - np.roll(X2, j, axis=0)).shape)
-        #         x_i_j_diff = np.append(x_i_j_diff, np.tile(X1[j], (len(X2), 1)) - X2)
-        # else:
-        #     for j in range(len(X2)):
-        #         x_i_j_diff = np.append(x_i_j_diff, X1 - np.tile(X2[j], (len(X1), 1)))
-        # print('TEST SHAPE', x_i_j_diff.shape)
-        # print(x_i_j_diff.shape)
+    def create_diff_permutations_for_Xs(self, X1: np.ndarray, X2: np.ndarray):
+        # Creates a matrix with permutations of differences between each X sample from
+        # X1 and X2
+        
+        # Reshape X1 and X2 so they can be broadcast into a 3d matrix of dim
+        # (n, d, m) where n is len(X1), m is len(X2), and d is the number of 
+        # columns in each individual sample
+        X1 = X1.reshape(X1.shape[0], X1.shape[1], 1)
+        X2 = X2.reshape(X2.shape[0], X2.shape[1], 1)
+        X1_X2 = np.broadcast(X1, X2.T)
+        x_i_j_diff = np.empty(X1_X2.shape)
+        x_i_j_diff.flat = [x1_i - x2_j for x1_i, x2_j in X1_X2]
         return x_i_j_diff
-
-
-# def _pad_smaller_matrix_with_0s(X1: np.ndarray, X2: np.ndarray) -> (np.ndarray, np.ndarray):
-#     row_diff = len(X1) - len(X2)
-#     if row_diff == 0:
-#         return X1, X2
-#     elif row_diff < 0:
-#         X1 = np.pad(X1, pad_width=((0, -row_diff),(0, 0)))
-#     elif row_diff > 0:
-#         X2 = np.pad(X2, pad_width=((0, row_diff),(0, 0)))
-#     return X1, X2
-
-
-# NOTE: This is code from Shibo to maybe improve my Kernel's performance, but I don't want to use it until I understand it
-# class Kernel_ARD:
-#     def __init__(self, jitter=0):
-#         self.jitter = tf.constant(jitter, dtype=tf_type)
-    
-#     def matrix(self, X, amp, ls):
-#         K = self.cross(X,X,amp, ls)
-#         K = K + self.jitter * tf.eye(tf.shape(X)[0], dtype=tf_type)
-#         return K
-
-#     def cross(self, X1, X2, amp, ls):
-#         norm1 = tf.reshape(tf.reduce_sum(X1**2, 1), [-1, 1])
-#         norm2 = tf.reshape(tf.reduce_sum(X2**2, 1), [1, -1])
-#         K = norm1 - 2.0 * tf.matmul(X1, tf.transpose(X2)) + norm2
-#         K = amp * tf.exp(-1.0 * K / ls)
-#         return K

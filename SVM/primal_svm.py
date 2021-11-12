@@ -24,14 +24,12 @@ class PrimalSvmModel:
     def create_model(self):
         self.t = 0
         for epoch in range(self.epochs):
-            print(epoch)
+            print('EPOCH:', epoch)
             if self.random_seed:
                 epoch_X = self.X.sample(frac=1)
             else:
                 epoch_X = self.X.sample(frac=1, random_state=epoch)
             epoch_y = self.y.iloc[epoch_X.index.to_list()]
-            # gamma_t = self.calc_gamma_t(epoch)
-            # self.calc_weights_per_epoch(epoch_X, epoch_y, gamma_t)
             self.calc_weights_per_epoch(epoch_X, epoch_y, 0)
 
     def calc_weights_per_epoch(self, X: pd.DataFrame, y: pd.Series, gamma_t: float):
@@ -44,13 +42,9 @@ class PrimalSvmModel:
             is_error = y_i * np.dot(self.weights, x_i) <= 1
             w_0 = np.append(self.weights[:-1], 0)
             if is_error:
-                # print(y_i * np.dot(self.weights, x_i))
-                # self.weights -= gamma_t * self.calc_del_J(y_i, x_i)
                 self.weights -= gamma_t * w_0
                 self.weights += gamma_t * self.C * self.N * y_i * x_i
             else:
-                # print('NO ERROR!')
-                # print(y_i * np.dot(self.weights, x_i))
                 self.weights[:-1] = (1 - gamma_t) * self.weights[:-1]
             self.J = np.append(self.J, self.calc_J(y_i, x_i))
 
@@ -65,22 +59,9 @@ class PrimalSvmModel:
     def calc_gamma_t(self, t: int) -> float:
         return self.gamma_0 / (1 + (self.gamma_0 / self.a) * t)
 
-    # def calc_del_J(self, y_i: float, x_i: np.ndarray) -> np.ndarray:
-    #     # dJ/dw_k = w_k + C * N * max(0, -y_i * x_i_k)
-    #     # dJ/db = C * N * max(0, -y_i)
-    #     d_hinge_loss = self.calc_derivative_hinge_loss(y_i, x_i[:-1])
-    #     dJ_dw = self.weights.values[:-1] + self.C * self.N * d_hinge_loss
-    #     dJ_db = self.C * self.N * max(0, -y_i)
-    #     return np.append(dJ_dw, dJ_db)
-
     def calc_hinge_loss(self, y_i: float, x_i: np.ndarray):
         # hinge loss = max(0, 1 - y_i * {w, x_i})
         return np.max([0, 1 - y_i * np.dot(self.weights.values, x_i)])
-
-    # @staticmethod
-    # def calc_derivative_hinge_loss(y_i: float, x_i: np.ndarray) -> np.ndarray:
-    #     # derivative of hinge loss with respect to w_k: max(0, -y_i * x_i_k)
-    #     return np.maximum(0, -y_i * x_i)
 
     def test(self, X: pd.DataFrame, y: pd.Series) -> float:
         X['MODEL_BIAS'] = -1

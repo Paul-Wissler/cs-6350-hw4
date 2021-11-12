@@ -21,9 +21,12 @@ class DualSvmModel:
     def create_model(self):
         alpha_optimization = self.calc_lagrangian_multipliers(self.X.values, self.y.values, self.kernel)
         init_alpha = alpha_optimization.x
-        self.sv_X, self.sv_y, self.alpha = self.determine_support_vectors(
+        self.sv_ix = self.determine_support_vectors(
             init_alpha, self.X.values, self.y.values
         )
+        self.sv_X = self.X.values[self.sv_ix]
+        self.sv_y = self.y.values[self.sv_ix]
+        self.alpha = init_alpha[self.sv_ix]
         self.bias = self.calc_bias()
 
     def calc_lagrangian_multipliers(self, X: np.ndarray, y: np.ndarray, kernel) -> np.ndarray:
@@ -55,8 +58,7 @@ class DualSvmModel:
 
     def determine_support_vectors(self, alpha: np.ndarray, X: np.ndarray, y: np.ndarray) -> np.ndarray:
         # Support vectors come from indices where lagrange multiplier is > 0
-        is_alpha_gt_0 = np.where(alpha > 0)
-        return X[is_alpha_gt_0], y[is_alpha_gt_0], alpha[is_alpha_gt_0]
+        return np.where(alpha > 0)
 
     def calc_weight_vector(self) -> np.ndarray:
         return np.dot(self.sv_X.T, np.multiply(self.alpha, self.sv_y))
@@ -71,4 +73,5 @@ class DualSvmModel:
 
     def evaluate(self, X: pd.DataFrame, kernel=linear_kernel) -> np.ndarray:
         k = kernel.calc_kernel(self.sv_X, X.to_numpy())
+        print('EVAL KERNEL SHAPE:', k.shape)
         return np.sign(np.dot(np.multiply(self.alpha, self.sv_y), k) + self.bias)
