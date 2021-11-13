@@ -64,7 +64,7 @@ class PrimalSvmModel:
         return np.max([0, 1 - y_i * np.dot(self.weights.values, x_i)])
 
     def test(self, X: pd.DataFrame, y: pd.Series) -> float:
-        X['MODEL_BIAS'] = -1
+        X['MODEL_BIAS'] = 1
         y_hat = self.evaluate(X)
         s = y.to_numpy() == y_hat
         return np.sum(s) / len(s)

@@ -47,7 +47,6 @@ def q2a():
         result = dict()
         for i, x in enumerate(X.columns):
             result[x] = model.weights[i]
-        result['MODEL_BIAS'] = model.bias
         result['TrainingError'] = train_error
         result['TestError'] = test_error
         result['C'] = hyper_c
@@ -97,7 +96,6 @@ def q2b():
         result = dict()
         for i, x in enumerate(X.columns):
             result[x] = model.weights[i]
-        result['MODEL_BIAS'] = model.bias
         result['TrainingError'] = train_error
         result['TestError'] = test_error
         result['C'] = hyper_c
