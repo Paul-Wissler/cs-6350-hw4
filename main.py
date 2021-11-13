@@ -9,10 +9,10 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def main():
-    # part2.q2a()
+    part2.q2a()
     part2.q2b()
-    # part2.q3a()
-    # part2.q3b_c()
+    part2.q3a()
+    part2.q3b_c()
 
 
 if __name__ == '__main__':
