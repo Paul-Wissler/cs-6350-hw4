@@ -9,7 +9,7 @@ import SVM as svm
 
 
 def q2a():
-    print('PRIMAL SVM: 2a')
+    print('\nPART 2 Q2a: PRIMAL SVM')
     X, y = load_bank_note_data('train.csv')
     X_test, y_test = load_bank_note_data('test.csv')
     
@@ -30,10 +30,10 @@ def q2a():
 
     for i, hyper_c in enumerate(hyper_cs):
         print(f'HYPER PARAMETER C: {hyper_c}')
-        model = svm.PrimalSvmModel(X, y, epochs=100, hyper_c=hyper_c, rate=1e-1, rate_damping=1e-3, random_seed=False)
-        train_error = 1 - model.test(X, y)
+        model = svm.PrimalSvmModel(X.copy(), y.copy(), epochs=100, hyper_c=hyper_c, rate=1e-1, rate_damping=1e-3, random_seed=False)
+        train_error = 1 - model.test(X.copy(), y.copy())
         print('TRAIN ERROR: ', train_error)
-        test_error = 1 - model.test(X_test, y_test)
+        test_error = 1 - model.test(X_test.copy(), y_test.copy())
         print('TEST ERROR: ', test_error)
         print('')
         print(model.weights)
@@ -47,6 +47,7 @@ def q2a():
         result = dict()
         for i, x in enumerate(X.columns):
             result[x] = model.weights[i]
+        result['MODEL_BIAS'] = model.weights[i + 1]
         result['TrainingError'] = train_error
         result['TestError'] = test_error
         result['C'] = hyper_c
@@ -58,7 +59,7 @@ def q2a():
 
 
 def q2b():
-    print('PRIMAL SVM: 2b')
+    print('\nPART 2 Q2b: PRIMAL SVM')
     X, y = load_bank_note_data('train.csv')
     X_test, y_test = load_bank_note_data('test.csv')
     
@@ -79,10 +80,11 @@ def q2b():
 
     for i, hyper_c in enumerate(hyper_cs):
         print(f'HYPER PARAMETER C: {hyper_c}')
-        model = svm.PrimalSvmModel(X, y, epochs=100, hyper_c=hyper_c, rate=1, rate_damping=1, random_seed=False)
-        train_error = 1 - model.test(X, y)
+        model = svm.PrimalSvmModel(X.copy(), y.copy(), epochs=100, hyper_c=hyper_c, 
+            rate=1, rate_damping=1, random_seed=False)
+        train_error = 1 - model.test(X.copy(), y.copy())
         print('TRAIN ERROR: ', train_error)
-        test_error = 1 - model.test(X_test, y_test)
+        test_error = 1 - model.test(X_test.copy(), y_test.copy())
         print('TEST ERROR: ', test_error)
         print('')
         print(model.weights)
@@ -96,6 +98,7 @@ def q2b():
         result = dict()
         for i, x in enumerate(X.columns):
             result[x] = model.weights[i]
+        result['MODEL_BIAS'] = model.weights[i + 1]
         result['TrainingError'] = train_error
         result['TestError'] = test_error
         result['C'] = hyper_c
@@ -107,7 +110,7 @@ def q2b():
 
 
 def q3a():
-    print('DUAL SVM')
+    print('\nPART 2 Q3a: DUAL SVM')
     X, y = load_bank_note_data('train.csv')
     X_test, y_test = load_bank_note_data('test.csv')
     
@@ -128,12 +131,12 @@ def q3a():
 
     for hyper_c in hyper_cs:
         print(f'HYPER PARAMETER C: {hyper_c}')
-        model = svm.DualSvmModel(X, y, hyper_c=hyper_c)
+        model = svm.DualSvmModel(X.copy(), y.copy(), hyper_c=hyper_c)
         print('')
         print('SUPPORT VECTORS:', len(model.sv_X))
-        train_error = 1 - model.test(X, y)
+        train_error = 1 - model.test(X.copy(), y.copy())
         print('TRAIN ERROR: ', train_error)
-        test_error = 1 - model.test(X_test, y_test)
+        test_error = 1 - model.test(X_test.copy(), y_test.copy())
         print('TEST ERROR: ', test_error)
         print('')
         print(model.calc_weight_vector())
@@ -156,7 +159,7 @@ def q3a():
 
 
 def q3b_c():
-    print('GAUSS SVM')
+    print('\nPART 2 Q3b: GAUSS SVM')
     X, y = load_bank_note_data('train.csv')
     X_test, y_test = load_bank_note_data('test.csv')
     
@@ -193,9 +196,9 @@ def q3b_c():
             model = svm.DualSvmModel(X, y, hyper_c=hyper_c, kernel=svm.GaussianKernel(gamma))
             print('')
             print('SUPPORT VECTORS:', len(model.sv_X))
-            train_error = 1 - model.test(X, y)
+            train_error = 1 - model.test(X.copy(), y.copy())
             print('TRAIN ERROR: ', train_error)
-            test_error = 1 - model.test(X_test, y_test)
+            test_error = 1 - model.test(X_test.copy(), y_test.copy())
             print('TEST ERROR: ', test_error)
             print('')
             print(model.calc_weight_vector())
