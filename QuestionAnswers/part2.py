@@ -182,6 +182,7 @@ def q3b_c():
         'GAMMA',
         'TrainingError',
         'TestError',
+        'SvCount',
     ]
 
     b_results = pd.DataFrame(columns=b_results_cols)
@@ -211,6 +212,7 @@ def q3b_c():
             result['TrainingError'] = train_error
             result['TestError'] = test_error
             result['C'] = hyper_c
+            result['SvCount'] = len(model.sv_X)
             b_results = b_results.append(pd.Series(result), ignore_index=True).reset_index(drop=True)
             print(b_results)
 
