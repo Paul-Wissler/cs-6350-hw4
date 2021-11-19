@@ -16,7 +16,7 @@
 \newcommand{\bx}{{\bf x}}
 \newcommand{\bw}{{\bf w}}
 
-\title{CS 5350/6350: Machine Learining \semester}
+\title{CS 5350/6350: Machine Learning \semester}
 \author{Homework \assignmentId}
 \date{Handed out: \releaseDate\\
 	Due: \dueDate}
@@ -80,24 +80,66 @@
 	As we discussed in the class, the slack variables $\{\xi_i\}$ are introduced to allow the training examples to break into the margin so that we can learn a linear classifier even when the data is not linearly separable. 
 	\begin{enumerate}
 		\item~[3 point] What values $\xi_i$ can take when the training example $\x_i$ breaks into the margin? 
+		
+		\emph{Answer}
+		We can find the answer through simple algebra
+		\[
+		    y_i(\w^\top \x_i + b) \ge 1 - \xi_i
+	    \]
+	    \[
+		    => \xi_i \ge 1 - y_i(\w^\top \x_i + b)
+		\]
+		
 		\item~[3 point] What values $\xi_i$ can take when the training example $\x_i$ stays on or outside the margin? 
+		
+		\emph{Answer}
+		
+		$\xi_i$ will be zero because no slack is necessary in this case.
+		
 		\item~[3 point] Why do we incorporate the term $C\cdot\sum_i \xi_i $ in the objective function? What will happen if we throw out this term?
+		
+		\emph{Answer}
+		
+		$C\cdot\sum_i \xi_i$ means that we are trying to minimize the total slack in a trade-off with maximizing the margin, where C is the trade-off term. Without slack, we will not be able to create a model for cases when the data is not linearly separable.
+		
 	\end{enumerate}
 	
 	
 	\item~[6 points] Write down the dual optimization problem for soft SVMs.  
 	Please clearly indicate the constraints, and explain how it is derived. (Note: do NOT directly copy slides content, write down your own understanding.)
 	
+	\emph{Answer}
+	
+	First, the optimization problem statement is summed up as the following:
+	
+	\[
+	    \min_{\{0 \leq \alpha_i \leq C\}, \sum_i \alpha_i y_i} \frac{1}{2} \sum_i \sum_j y_i y_j \alpha_i \alpha_j \x^\top \x - \sum_i \alpha_i
+	\]
+	
+	The constraints are that we want to find the minimum $\alpha_i$ such that it lies between 0 and our hyper-parameter C, and also such that the dot product between our vectors of $\alpha$ and $\y$ will sum to $0$. This minimization problem is derived by using Lagrangian multipliers and then taking derivatives with respect to the weight vector, the bias, and $\xi$, our slack variable and setting these derivatives to 0, doing some algebra and resubbing the results back into the original L equation.
 	
 	\item~[10 points] Continue with the dual form. Suppose after the training procedure, you have obtained the optimal parameters.
 	\begin{enumerate}
 		\item~[4 points] What parameter values can indicate if an example stays outside the margin?
+		
+		\emph{Answer}
+		
+		The parameter values that would indicate that a given vector/example is outside the margin is 0.
+		
 		\item~[6 points]  if we want to find out which training examples just sit on the margin (neither inside nor outside), what shall we do? Note you are not allowed to examine if the functional margin (\ie $y_i(\w^\top\x_i +b)$) is $1$.
+		
+		\emph{Answer}
+		
+		Since any vectors outside the margin have $\alpha=0$, I would expect that any values just slightly bigger than 0 (i.e. any $\delta > 0$) likely sit on the margin.
+		
 	\end{enumerate}
 	
 	
 	\item~[6 points] How can we use the kernel trick to enable SVMs to perform nonlinear classification? What is the corresponding optimization problem?
 
+    \emph{Answer}
+    
+    We apply a kernel to our examples, putting them into a new space, making it a linear classification problem. The corresponding optimization problem we use is Dual SVM.
 		
 	%calculate the subgradient
 	\item~[9 points] Suppose we have the training dataset shown in Table 1. We want to learn a SVM classifier. We initialize all the model parameters with $0$. We set the learning rates for the first three steps to $\{0.01, 0.005, 0.0025\}$.  Please list the sub-gradients of the SVM objective w.r.t the model parameters for the first three steps, when using the stochastic sub-gradient descent algorithm. 
@@ -111,6 +153,139 @@
 			$1.5$ & $0.2$ & $-2.5$ & $1$\\ \hline
 		\end{tabular}
 	\caption{Dataset}
+	\end{table}
+	
+	\emph{Answer}
+	
+	We use the code in Listing 1 to generate the results seen in Tables 2-4, which show how the weight vectors change over each iteration of the sub-gradient descent. The following statements were printed out:
+\begin{verbatim}
+PART 1 QUESTION 5
+X matrix:
+ [[ 0.5 -1.   0.3]
+ [-1.  -2.  -2. ]
+ [ 1.5  0.2 -2.5]]
+y vector:
+ [[ 1]
+ [-1]
+ [ 1]]
+hyper parameter C: 0.3333333333333333
+initial weight vector:
+ [0 0 0]
+initial bias: 0
+
+Gamma for iteration 1: 0.01
+Case is <= 1? True
+Update according to case 1
+Iteration 1 update:
+New weight vector:
+ [ 0.005 -0.01   0.015]
+New bias: 0.009999999999999998
+
+Gamma for iteration 2: 0.005
+Case is <= 1? True
+Update according to case 1
+Iteration 2 update:
+New weight vector:
+ [9.9750e-03 5.0000e-05 1.3925e-02]
+New bias: 0.004999999999999999
+
+Gamma for iteration 3: 0.0025
+Case is <= 1? True
+Update according to case 1
+Iteration 3 update:
+New weight vector:
+ [ 0.01070006 -0.00495012  0.00764019]
+New bias: 0.007499999999999999
+    
+\end{verbatim}
+	
+	\begin{lstlisting}[language=Python, caption=Functions used to generate results for Part 1 Question 5]
+import numpy as np
+
+
+def q5():
+    print('PART 1 QUESTION 5')
+    x1 = np.array([[0.5], [-1], [1.5]])
+    x2 = np.array([[-1], [-2], [0.2]])
+    x3 = np.array([[0.3], [-2], [-2.5]])
+    y = np.array([[1], [-1], [1]])
+    w = np.array([0, 0, 0])
+    b = 0
+    X = np.hstack([x1, x2, x3])
+    C = 1/3
+    gamma = [0.01, 0.005, 0.0025]
+    print('X matrix:\n', X)
+    print('y vector:\n', y)
+    print('hyper parameter C:', C)
+    print('initial weight vector:\n', w)
+    print('initial bias:', b)
+
+    for i in range(3):
+        gamma_i = gamma[i]
+        print(f'\nGamma for iteration {i + 1}: {gamma_i}')
+        pass_check = compute_check_case(X.T[i], w, y[i])
+        print('Case is <= 1?', pass_check)
+        if pass_check:
+            print('Update according to case 1')
+            w, b = case_1_update(w, gamma_i, b, C, len(X[i]), y[i], X.T[i])
+        else:
+            print('Update according to case 2')
+            w = case_2_update(w, gamma_t)
+        print(f'Iteration {i + 1} update:')
+        print('New weight vector:\n', w)
+        print('New bias:', b)
+
+
+def compute_check_case(x_i: np.ndarray, w: np.ndarray, y_i: int) -> bool:
+    return (y_i * w.T * x_i <= 1)[0]
+ 
+
+def case_1_update(w: np.ndarray, gamma_t: float, b: float, C: float, N: int, y_i, x_i):
+    return (w - gamma_t * w + gamma_t * C * N * y_i * x_i), (b + gamma_t * C * N * y_i * 1)[0]
+
+
+def case_2_update(w: np.ndarray, gamma_t: float):
+    return (1 - gamma_t) * w
+
+    \end{lstlisting}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{c|c}
+			$x$ & $w_1$ \\ 
+			\hline\hline
+			$0.5$ & $0.005$  \\ \hline
+			$-1$  & $-0.01$  \\ \hline
+			$1.5$ & $0.015$  \\ \hline
+			$1$   & $0.0100$ \\ \hline
+		\end{tabular}
+	\caption{Part 1 Question 5 Pass 1}
+	\end{table}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{c|c}
+			$x$ & $w_2$ \\ 
+			\hline\hline
+			$-1$  & $9.975e-03$ \\ \hline
+			$-2$  & $5.000e-05$ \\ \hline
+			$0.2$ & $1.393e-02$ \\ \hline
+			$1$   & $0.0050$    \\ \hline
+		\end{tabular}
+	\caption{Part 1 Question 5 Pass 2}
+	\end{table}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{c|c}
+			$x$ & $w_3$ \\ 
+			\hline\hline
+			$0.3$  & $0.0107$  \\ \hline
+			$-2$   & $-0.0050$ \\ \hline
+			$-2.5$ & $0.0076$  \\ \hline
+			$1$    & $0.0075$  \\ \hline
+		\end{tabular}
+	\caption{Part 1 Question 5 Pass 3}
 	\end{table}
 
 	%kernel Perceptron
@@ -127,13 +302,57 @@
 \section{Practice [60 points + 10 bonus ]}
 \begin{enumerate}
 	\item~[2 Points] Update your machine learning library. Please check in your implementation of Perceptron, voted Perceptron and average Perceptron algorithms. Remember last time you created the folders ``Perceptron". You can commit your code into the corresponding folders now. Please also supplement README.md with concise descriptions about how to use your code to run these algorithms (how to call the command, set the parameters, etc). Please create a new folder ``SVM" in the same level as these folders.  
+	
+	\emph{Answer}
+	
+	\href{https://github.com/Paul-Wissler/cs-6350-hw4}{The GitHub repo is not the same as previous projects and can be found by clicking here.}
 
 %kernel perceptron, kernel svms
 	\item~[28 points] We will first implement SVM in the primal domain with stochastic sub-gradient descent. We will reuse the  dataset for Perceptron implementation, namely, ``bank-note.zip'' in Canvas. The features and labels are listed in the file ``classification/data-desc.txt''. The training data are stored in the file ``classification/train.csv'', consisting of $872$ examples. The test data are stored in ``classification/test.csv'', and comprise of $500$ examples. In both the training and test datasets, feature values and labels are separated by commas. Set the maximum epochs $T$ to 100. Don't forget to shuffle the training examples at the start of each epoch. Use the curve of the objective function (along with the number of updates) to diagnosis the convergence. Try the hyperparameter $C$ from $\{ \frac{100}{873}, \frac{500}{873,} \frac{700}{873}\}$. Don't forget to convert the labels to be in $\{1, -1\}$.  
 	\begin{enumerate}
 		\item~[12 points] Use the schedule of learning rate: $\gamma_t = \frac{\gamma_0}{1+\frac{\gamma_0}{a}t}	$. Please tune $\gamma_0$ and $a$ to ensure convergence. For each setting of $C$, report your training and test error. 
+		
+		\emph{Answer}
+		
+		The value for $\gamma_0$ I used was $0.1$, and the value for $a$ was $0.001$. The Training and Test Errors can be found in Table 5.
+		
+		\begin{table}[h]
+    		\centering
+    		\begin{tabular}{ccccccc|c}
+        		$W_{wave.var.}$ & $W_{wave.skew}$ & $W_{wave.curt.}$ & $W_{img.entr.}$ & $Bias$ & Train. Err. & Test Err. & $C$ \\
+        		\hline\hline
+                -0.6357 & -0.2895 & -0.3109 & -0.1002 & 0.1681 & 0.0298 & 0.0340 & 0.1145 \\ \hline
+                -2.5356 & -1.1667 & -1.4354 & -0.3031 & 0.4562 & 0.0275 & 0.0380 & 0.5727 \\ \hline
+                -3.5380 & -1.6206 & -2.0162 & -0.4104 & 0.6019 & 0.0275 & 0.0400 & 0.8018 \\ \hline
+    		\end{tabular}
+    	\caption{Training and test errors for part 2 q2a.}
+    	\end{table}
+		
 		\item~[12 points] Use the schedule $\gamma_t = \frac{\gamma_0}{1+t}$. Report the training and test error for each setting of C. 
+		
+		\emph{Answer}
+		
+		For this, I simply needed to pass in the same value for both $\gamma_0$ and $a$, as they would cancel each other out to $1$ if both were $>0$. The Training and Test Errors can be found in Table 6.
+		
+		\begin{table}[h]
+    		\centering
+    		\begin{tabular}{ccccccc|c}
+        		$W_{wave.var.}$ & $W_{wave.skew}$ & $W_{wave.curt.}$ & $W_{img.entr.}$ & $Bias$ & Train. Err. & Test Err. & $C$ \\
+        		\hline\hline
+                -1.4807 & -0.8737 & -1.0926 & 0.0873 & 2.4854  & 0.0172 & 0.0180 & 0.1145 \\ \hline
+                -6.5171 & -3.9263 & -4.9219 & 1.6185 & 13.0606 & 0.0183 & 0.0180 & 0.5727 \\ \hline
+                -9.0353 & -5.3508 & -6.7507 & 2.4361 & 18.4582 & 0.0195 & 0.0180 & 0.8018 \\ \hline
+    		\end{tabular}
+    	\caption{Training and test errors for part 2 q2b.}
+    	\end{table}
+		
 		\item~[6 points] For each $C$, report the differences between the model parameters learned from the two learning rate schedules, as well as the differences between the training/test errors. What can you conclude? 
+		
+		\emph{Answer}
+		
+		Given that the results are generally better in Table 6, I would conclude that damping how quickly the learning rate $\gamma_0$ change may not necessarily help yield better results (~3\% error on Test Data in Table 5 vs 1.8\% error on Test Data in Table 6). I had tuned $\gamma_0$ for Table 5 so that the objective function would converge, but based on these results, it would seem that doing so was not necessary, since simply using a basic schedule yielded better results than what my tuned model did. However, this could be due to bad tuning, and so perhaps re-tuning $\gamma_0$ would yield similar or better results in Table 5.
+		
+		As for the differences between the parameters themselves, they are not so different on a case by case basis, though the parameters in Table 6 are generally larger than those in Table 5. There are two notable differences, however. The $W_{img.etr}$ and $Bias$ are significantly different. The $Bias$ is quite a bit larger (on a different scale even) than in Table 6, while $W_{img.etr}$ is negative and small in Table 5 but positive and ~10 times larger in Table 6. For $W_{img.etr}$ this may be due simply to where the epochs ended, since the objective function oscillates, and these values relative to the overall margin is actually reasonably small, which seems plausible given how similar the errors are. The $Bias$ may have ended up this way for a similar reason, or alternatively it could be that due to how much more quickly $\gamma_t$ changed in Table 6, that there were simply more cases where the $Bias$ had to be updated, and the rest of the weight vectors changed in response. It may be useful to plot each linear function against the actual data points to do a "spot check" on how well it maximized the margin, though for the sake of time I will not do so for this project.
 	\end{enumerate}
 
 
@@ -144,13 +363,74 @@ For R, we recommend using the ``nloptr'' package with detailed documentation at 
 \begin{enumerate}
 	\item ~[10 points] First, run your dual SVM learning algorithm with   $C$ in $\{\frac{100}{873}, \frac{500}{873}, \frac{700}{873}\}$. Recover the feature weights $\w$ and the bias $b$. Compare with the parameters learned with stochastic sub-gradient descent in the primal domain (in Problem 2) and the same settings of $C$, what can you observe? What do you conclude and why?
 	
+	\emph{Answer}
+	
+	The weight vector returned for each C as well as their respective training and test errors can be found in Table 7. The learned parameters and bias, as well as the errors, tend to land somewhere between Table 6 and Table 7. I would conclude that the Dual SVM yields similar results to Primal SVM Sub-Gradient Descent. This makes sense because Primal and Dual SVMs are supposed to be equivalent.
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{ccccccc|c}
+    		$W_{wave.var.}$ & $W_{wave.skew}$ & $W_{wave.curt.}$ & $W_{img.entr.}$ & $Bias$ & Train. Err. & Test Err. & $C$ \\
+    		\hline\hline
+            -0.9429 & -0.6515 & -0.7337 & -0.0410 & 2.3802 & 0.0229 & 0.0240 & 0.1145 \\ \hline
+            -1.5639 & -1.0141 & -1.1807 & -0.1565 & 3.8609 & 0.0310 & 0.0340 & 0.5727 \\ \hline
+            -2.0425 & -1.2807 & -1.5135 & -0.2491 & 4.9736 & 0.0333 & 0.0360 & 0.8018 \\ \hline
+		\end{tabular}
+	\caption{Training and test errors for part 2 q3a.}
+	\end{table}
+	
 	\item~[15 points] Now, use Gaussian kernel in the dual form to implement the nonlinear SVM. Note that you need to modify both the objective function and the prediction. The Gaussian kernel is defined as follows:
 	\[
 	k(\x_i, \x_j) = \exp(-\frac{\|\x_i - \x_j\|^2}{\gamma}).
 	\]
 	Test $\gamma$ from $\{0.1, 0.5, 1,  5, 100\}$ and the hyperparameter $C$ from $\{ \frac{100}{873}, \frac{500}{873},  \frac{700}{873}\}$. List the training and test errors for the combinations of all the $\gamma$ and $C$ values. What is the best combination? Compared with linear SVM with the same settings of $C$, what do you observe? What do you conclude and why?  
 	
+	\emph{Answer}
+	
+	The training and test errors can be found in Table 8. These results clearly indicate that depending on the hyperparameters, either the model performs much worse, or much better. The best combination in this case based on the Training and Test Errors is both when $(C=0.5727=\frac{500}{873};\gamma=5)$ and $(C=0.8018=\frac{700}{873};\gamma=5)$. I would conclude that for this dataset that the ability to create a non-linear classifier allows for a much better fit, but it requires more tuning and processing time than with the Primal Sub-Gradient Descent or Linear Dual SVM. The reason why there is more variability between the Gaussian and Linear model for the training and test errors is likely linked--fundamentally--to the fact that Gaussian Kernel has an additional degree of freedom (i.e. another hyperparameter to be tuned) that can greatly transform the training data. This degree of freedom, that is to say $\gamma$, affects how well the differences between different rows of the training data are represented. In the case when $\gamma$ is very small, the differences end up being represented as essentially 0, but as $\gamma$ increases the difference between different vectors are more easily discerned, making it easier for the model to determine which rows should be included as support vectors.
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{cc|ccc}
+			$C$ & $\gamma$ & Train. Err. & Test Err. & SV Count \\
+			\hline\hline
+            0.1145 & 0.1 & 0.0722 & 0.3940 & 871 \\ \hline
+            0.1145 & 0.5 & 0.0034 & 0.1040 & 839 \\ \hline
+            0.1145 & 1.0 & 0.0011 & 0.0260 & 857 \\ \hline
+            0.1145 & 5.0 & 0.0034 & 0.0040 & 800 \\ \hline
+            0.1145 & 100 & 0.0138 & 0.0080 & 704 \\ \hline
+            0.5727 & 0.1 & 0.0000 & 0.2140 & 872 \\ \hline
+            0.5727 & 0.5 & 0.0000 & 0.0140 & 767 \\ \hline
+            0.5727 &  1  & 0.0000 & 0.0040 & 746 \\ \hline
+            0.5727 &  5  & 0.0000 & 0.0000 & 685 \\ \hline
+            0.5727 & 100 & 0.0080 & 0.0060 & 394 \\ \hline
+            0.8018 & 0.1 & 0.0000 & 0.1820 & 869 \\ \hline
+            0.8018 & 0.5 & 0.0000 & 0.0100 & 786 \\ \hline
+            0.8018 &  1  & 0.0000 & 0.0040 & 689 \\ \hline
+            0.8018 &  5  & 0.0000 & 0.0000 & 409 \\ \hline
+            0.8018 & 100 & 0.0080 & 0.0060 & 560 \\ \hline
+		\end{tabular}
+	\caption{Results for part 2 q3b.}
+	\end{table}
+	
 	\item~[5 points] Following (b), for each setting of $\gamma$ and $C$, list the number of support vectors. When $C = \frac{500}{873}$, report the number of overlapped support vectors between consecutive values of $\gamma$, \ie how many support vectors are the same for $\gamma= 0.01$ and $\gamma = 0.1$; how many are the same for  $\gamma = 0.1$ and $\gamma = 0.5$, etc. What do you observe and conclude? Why?
+	
+	\emph{Answer}
+	
+	The overlap results can be seen in Table 9, and the support vector counts can be found in Table 8. It would seem that the overlap between consecutive $\gamma$ values decreases. More importantly, it looks like as gamma increases, certain support vectors seem to be conserved. For example, all the support vectors for $\gamma=0.5$, every single one was also present when $\gamma=0.1$. So, even though with increasing values of $\gamma$ the number of support vectors decrease, certain support vectors for consecutive values of $\gamma$ tend be conserved. This is likely because certain vectors that have a large difference between $X_i$ and $X_j$ become larger and fall more firmly outside the margin, making it so that they are no longer support vectors.
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{cc|c}
+			$\gamma_i$ & $\gamma_j$ & Support Vector Overlap \\
+			\hline\hline
+            0.1 & 0.5 & 767 \\ \hline
+            0.5 & 1.0 & 680 \\ \hline
+            1.0 & 5.0 & 605 \\ \hline
+            5.0 & 100 & 320 \\ \hline
+		\end{tabular}
+	\caption{Results for part 2 q3c.}
+	\end{table}
 	
 	\item~[\textbf{Bonus}]~[10 points] Implement the kernel Perceptron algorithm you developed in Problem 8 (Section 1). Use Gaussian kernel and test $\gamma$ from $\{ 0.1, 0.5, 1, 5, 100\}$. List the training and test errors accordingly. Compared with the nonlinear SVM, what do you observe? what do you conclude and why?
 	

@@ -7,7 +7,6 @@ import numpy as np
 class LinearKernel:
 
     def calc_kernel(self, X1: np.ndarray, X2: np.ndarray):
-        # X1, X2 = _pad_smaller_matrix_with_0s(X1, X2)
         return np.dot(X1, X2.T)  # Gives a matrix of dot products between all x_i's
 
 
