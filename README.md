@@ -111,3 +111,17 @@ cost = model.compute_cost(test_c_data[x_cols], test_c_data.Output, model.weights
 For both gradient descent models, you must supply an X and a y. You may optionally supply the following kwargs: rate, convergence_threshold, max_rounds, and bias. The rate variable tunes how much the weights change each round. The convergence_threshold variable sets some lower limit that the norm of the difference of subsequent weights must meet to converge. The max_rounds variable sets a maximum number of iterations that the weights will change during training. The bias variable adjusts the bias of the model before training. Bias and weights cannot currently be randomized (bias could be randomized outside the model technically, but that's not a supported feature).
 
 The Gradient Descent Models track how much each step costs in the cost_of_each_step attribute, as well as the convergence of weights in the convergence_of_weights attribute.
+
+
+## Notes on Perceptron Models
+
+To use the Perceptron models, all can be instantiated the following ways:
+
+```python
+model = perc.PerceptronModel(X, y, random_seed=False, rate=.1, epochs=10, bias=0)
+accuracy = model.test(X, y)
+```
+
+The random_seed variable will determine whether or not to use a deterministic random state for each shuffle per epoch, and epochs will determine how many epochs to loop throug, while rate will determine the learning rate and bias will instantiate the bias to some variable for the model.
+
+For voted perceptron, the votes can be accessed with the votes_list attribute. For the averaged perceptron, the averaged weights can be accessed with the averaged_weights attribute.
